@@ -11,6 +11,16 @@ const home = document.getElementById("home");
 const game = document.getElementById("game");
 const board = document.getElementById("board");
 const ctx = board.getContext("2d");
+// Auto-resize canvas for mobile screens
+function resizeCanvas() {
+  const width = Math.min(window.innerWidth * 0.9, 900);
+  const height = width * 0.75;
+  board.width = width;
+  board.height = height;
+}
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+
 
 const playerNameInput = document.getElementById("playerName");
 const joinCodeInput = document.getElementById("joinCode");
