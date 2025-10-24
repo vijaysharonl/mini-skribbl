@@ -184,13 +184,16 @@ board.addEventListener("mouseleave", () => {
 });
 
 /* -------------------- TOUCH SUPPORT -------------------- */
+/* -------------------- TOUCH SUPPORT (Improved) -------------------- */
 board.addEventListener(
   "touchstart",
   (e) => {
     if (!isDrawer) return;
+    e.preventDefault();
     const rect = board.getBoundingClientRect();
-    const x = e.touches[0].clientX - rect.left;
-    const y = e.touches[0].clientY - rect.top;
+    const touch = e.touches[0];
+    const x = ((touch.clientX - rect.left) / rect.width) * board.width;
+    const y = ((touch.clientY - rect.top) / rect.height) * board.height;
     drawing = true;
     ctx.beginPath();
     ctx.moveTo(x, y);
@@ -199,32 +202,35 @@ board.addEventListener(
     ctx.strokeStyle = color;
     socket.emit("startDrawing", { roomCode, x, y, color, size });
   },
-  { passive: true }
+  { passive: false }
 );
 
 board.addEventListener(
   "touchmove",
   (e) => {
     if (!isDrawer || !drawing) return;
+    e.preventDefault();
     const rect = board.getBoundingClientRect();
-    const x = e.touches[0].clientX - rect.left;
-    const y = e.touches[0].clientY - rect.top;
+    const touch = e.touches[0];
+    const x = ((touch.clientX - rect.left) / rect.width) * board.width;
+    const y = ((touch.clientY - rect.top) / rect.height) * board.height;
     ctx.lineTo(x, y);
     ctx.stroke();
     socket.emit("drawing", { roomCode, x, y });
   },
-  { passive: true }
+  { passive: false }
 );
 
 board.addEventListener(
   "touchend",
-  () => {
+  (e) => {
     if (!isDrawer) return;
+    e.preventDefault();
     drawing = false;
     ctx.beginPath();
     socket.emit("stopDrawing", { roomCode });
   },
-  { passive: true }
+  { passive: false }
 );
 
 /* -------------------- MIRROR REMOTE DRAWING -------------------- */
