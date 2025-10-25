@@ -11,16 +11,6 @@ const home = document.getElementById("home");
 const game = document.getElementById("game");
 const board = document.getElementById("board");
 const ctx = board.getContext("2d");
-// Auto-resize canvas for mobile screens
-function resizeCanvas() {
-  const width = Math.min(window.innerWidth * 0.9, 900);
-  const height = width * 0.75;
-  board.width = width;
-  board.height = height;
-}
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
-
 
 const playerNameInput = document.getElementById("playerName");
 const joinCodeInput = document.getElementById("joinCode");
@@ -30,7 +20,28 @@ const drawerWord = document.getElementById("drawerWord");
 const playersDiv = document.getElementById("players");
 const scoresDiv = document.getElementById("scores");
 const chatDiv = document.getElementById("chat");
-const startBtn = document.getElementById("startGame"); // host start button
+const startBtn = document.getElementById("startGame");
+
+/* -------------------- STABLE CANVAS SIZE (PC + MOBILE) -------------------- */
+// lock once on load (prevents disappearing drawings)
+function lockCanvasSize() {
+  const rect = board.getBoundingClientRect();
+  board.width = rect.width;
+  board.height = rect.height;
+}
+window.addEventListener("load", lockCanvasSize);
+
+/* Prevent mobile viewport resize from clearing canvas */
+if (window.visualViewport) {
+  window.visualViewport.addEventListener(
+    "resize",
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    },
+    { passive: true }
+  );
+}
 
 /* -------------------- LOBBY BUTTONS -------------------- */
 document.getElementById("createRoom").addEventListener("click", () => {
@@ -52,7 +63,7 @@ socket.on("roomCreated", (code) => {
   isDrawer = false;
   isHost = true;
   enterGame(code);
-  startBtn.style.display = "inline-block"; // host sees start button
+  startBtn.style.display = "inline-block";
 });
 
 socket.on("joinedRoom", (code) => {
@@ -87,7 +98,7 @@ socket.on("drawerChanged", ({ drawerName }) => {
   if (!isDrawer) {
     drawerWord.textContent = `${drawerName} is drawing...`;
   }
-  isDrawer = false; // make sure you reset yourself as guesser
+  isDrawer = false;
 });
 
 socket.on("setDrawer", ({ word }) => {
@@ -95,7 +106,6 @@ socket.on("setDrawer", ({ word }) => {
   drawerWord.textContent = `Your word: ${word}`;
   document.getElementById("hintWord").textContent = "";
 });
-
 
 socket.on("message", (msg) => {
   const div = document.createElement("div");
@@ -104,42 +114,16 @@ socket.on("message", (msg) => {
   chatDiv.scrollTop = chatDiv.scrollHeight;
 });
 
-socket.on("guess", ({ roomCode, guess }) => {
-  const room = rooms[roomCode];
-  if (!room || !room.word || !room.gameActive) return;
-
-  const name = room.players[socket.id]?.name || "Player";
-  const correct = guess.trim().toLowerCase() === room.word.toLowerCase();
-
-  if (correct) {
-    room.players[socket.id].score += 10;
-    io.to(roomCode).emit("message", `✅ ${name} guessed it right!`);
-    io.to(roomCode).emit("updateScores", Object.values(room.players));
-    clearInterval(room.timer);
-    setTimeout(() => nextRound(roomCode), 2000); // short pause
-  } else {
-    io.to(roomCode).emit("message", `${name}: ${guess}`);
-  }
-});
-
-
-
 /* -------------------- GAME CONTROL -------------------- */
-// Host can start game manually
 startBtn.addEventListener("click", () => {
   socket.emit("startGame");
-  startBtn.style.display = "none"; // hide after pressing
+  startBtn.style.display = "none";
 });
 
 /* -------------------- DRAWER WORD + HINT + TIMER -------------------- */
-socket.on("setDrawer", ({ word }) => {
-  isDrawer = true;
-  drawerWord.textContent = `Your word: ${word}`;
-  document.getElementById("hintWord").textContent = "";
-});
-
 socket.on("showHint", ({ hint }) => {
-  if (!isDrawer) document.getElementById("hintWord").textContent = `Hint: ${hint}`;
+  if (!isDrawer)
+    document.getElementById("hintWord").textContent = `Hint: ${hint}`;
 });
 
 socket.on("timerUpdate", (secondsLeft) => {
@@ -160,7 +144,7 @@ clearBtn.addEventListener("click", () => {
   socket.emit("clearCanvas", { roomCode });
 });
 
-// Mouse events
+/* ====== PC MOUSE DRAWING ====== */
 board.addEventListener("mousedown", (e) => {
   if (!isDrawer) return;
   drawing = true;
@@ -169,7 +153,13 @@ board.addEventListener("mousedown", (e) => {
   ctx.lineWidth = size;
   ctx.lineCap = "round";
   ctx.strokeStyle = color;
-  socket.emit("startDrawing", { roomCode, x: e.offsetX, y: e.offsetY, color, size });
+  socket.emit("startDrawing", {
+    roomCode,
+    x: e.offsetX,
+    y: e.offsetY,
+    color,
+    size,
+  });
 });
 
 board.addEventListener("mousemove", (e) => {
@@ -179,22 +169,17 @@ board.addEventListener("mousemove", (e) => {
   socket.emit("drawing", { roomCode, x: e.offsetX, y: e.offsetY });
 });
 
-board.addEventListener("mouseup", () => {
+board.addEventListener("mouseup", () => stopDrawing());
+board.addEventListener("mouseleave", () => stopDrawing());
+
+function stopDrawing() {
   if (!isDrawer) return;
   drawing = false;
   ctx.beginPath();
   socket.emit("stopDrawing", { roomCode });
-});
+}
 
-board.addEventListener("mouseleave", () => {
-  if (!isDrawer) return;
-  drawing = false;
-  ctx.beginPath();
-  socket.emit("stopDrawing", { roomCode });
-});
-
-/* -------------------- TOUCH SUPPORT -------------------- */
-/* -------------------- TOUCH SUPPORT (Improved) -------------------- */
+/* ====== MOBILE TOUCH DRAWING ====== */
 board.addEventListener(
   "touchstart",
   (e) => {
@@ -236,14 +221,12 @@ board.addEventListener(
   (e) => {
     if (!isDrawer) return;
     e.preventDefault();
-    drawing = false;
-    ctx.beginPath();
-    socket.emit("stopDrawing", { roomCode });
+    stopDrawing();
   },
   { passive: false }
 );
 
-/* -------------------- MIRROR REMOTE DRAWING -------------------- */
+/* -------------------- REMOTE DRAW MIRROR -------------------- */
 socket.on("startDrawing", ({ x, y, color, size }) => {
   ctx.beginPath();
   ctx.moveTo(x, y);
@@ -252,23 +235,19 @@ socket.on("startDrawing", ({ x, y, color, size }) => {
   ctx.strokeStyle = color;
 });
 
-
 socket.on("drawing", ({ x, y }) => {
   ctx.lineTo(x, y);
   ctx.stroke();
 });
 
-socket.on("stopDrawing", () => {
-  ctx.beginPath();
-});
-
+socket.on("stopDrawing", () => ctx.beginPath());
 socket.on("clearCanvas", () => clearCanvas());
 
 /* -------------------- GUESS INPUT -------------------- */
 document.getElementById("sendGuess").addEventListener("click", sendGuess);
-document.getElementById("guessInput").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") sendGuess();
-});
+document
+  .getElementById("guessInput")
+  .addEventListener("keydown", (e) => e.key === "Enter" && sendGuess());
 
 function sendGuess() {
   const input = document.getElementById("guessInput");
@@ -286,23 +265,6 @@ function enterGame(code) {
   game.style.display = "block";
   clearCanvas();
 }
-
-// ===== LOCK CANVAS SIZE AFTER INITIAL LOAD =====
-function lockCanvasSize() {
-  const rect = board.getBoundingClientRect();
-  board.width = rect.width;
-  board.height = rect.height;
-}
-
-window.addEventListener("load", lockCanvasSize);
-// Prevent viewport resize from redrawing canvas
-window.visualViewport?.addEventListener("resize", (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-});
-
-
-
 
 function clearCanvas() {
   ctx.clearRect(0, 0, board.width, board.height);
