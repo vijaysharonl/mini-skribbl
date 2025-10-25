@@ -12,6 +12,20 @@ const game = document.getElementById("game");
 const board = document.getElementById("board");
 const ctx = board.getContext("2d");
 
+// ===== STABLE CANVAS SIZING =====
+function setCanvasSize() {
+  const width = Math.min(window.innerWidth * 0.9, 900);
+  const height = width * 0.75;
+  board.width = width;
+  board.height = height;
+}
+window.addEventListener("load", setCanvasSize);
+window.addEventListener("resize", setCanvasSize);
+
+// Prevent accidental scroll from clearing the canvas
+board.style.touchAction = "none";
+
+// ===== BASIC DOM ELEMENTS =====
 const playerNameInput = document.getElementById("playerName");
 const joinCodeInput = document.getElementById("joinCode");
 const errorText = document.getElementById("error");
@@ -21,29 +35,11 @@ const playersDiv = document.getElementById("players");
 const scoresDiv = document.getElementById("scores");
 const chatDiv = document.getElementById("chat");
 const startBtn = document.getElementById("startGame");
+const colorPicker = document.getElementById("colorPicker");
+const brushSize = document.getElementById("brushSize");
+const clearBtn = document.getElementById("clearBtn");
 
-/* -------------------- STABLE CANVAS SIZE (PC + MOBILE) -------------------- */
-// lock once on load (prevents disappearing drawings)
-function lockCanvasSize() {
-  const rect = board.getBoundingClientRect();
-  board.width = rect.width;
-  board.height = rect.height;
-}
-window.addEventListener("load", lockCanvasSize);
-
-/* Prevent mobile viewport resize from clearing canvas */
-if (window.visualViewport) {
-  window.visualViewport.addEventListener(
-    "resize",
-    (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-    },
-    { passive: true }
-  );
-}
-
-/* -------------------- LOBBY BUTTONS -------------------- */
+/* -------------------- LOBBY -------------------- */
 document.getElementById("createRoom").addEventListener("click", () => {
   const name = playerNameInput.value.trim();
   if (!name) return (errorText.textContent = "Enter your name!");
@@ -95,9 +91,7 @@ socket.on("updateScores", (players) => {
 });
 
 socket.on("drawerChanged", ({ drawerName }) => {
-  if (!isDrawer) {
-    drawerWord.textContent = `${drawerName} is drawing...`;
-  }
+  if (!isDrawer) drawerWord.textContent = `${drawerName} is drawing...`;
   isDrawer = false;
 });
 
@@ -120,7 +114,7 @@ startBtn.addEventListener("click", () => {
   startBtn.style.display = "none";
 });
 
-/* -------------------- DRAWER WORD + HINT + TIMER -------------------- */
+/* -------------------- TIMER & HINTS -------------------- */
 socket.on("showHint", ({ hint }) => {
   if (!isDrawer)
     document.getElementById("hintWord").textContent = `Hint: ${hint}`;
@@ -131,11 +125,7 @@ socket.on("timerUpdate", (secondsLeft) => {
   timerFill.style.width = `${(secondsLeft / 80) * 100}%`;
 });
 
-/* -------------------- DRAWING UX -------------------- */
-const colorPicker = document.getElementById("colorPicker");
-const brushSize = document.getElementById("brushSize");
-const clearBtn = document.getElementById("clearBtn");
-
+/* -------------------- DRAWING CONTROLS -------------------- */
 colorPicker.addEventListener("change", (e) => (color = e.target.value));
 brushSize.addEventListener("input", (e) => (size = Number(e.target.value)));
 clearBtn.addEventListener("click", () => {
@@ -144,19 +134,20 @@ clearBtn.addEventListener("click", () => {
   socket.emit("clearCanvas", { roomCode });
 });
 
-/* ====== PC MOUSE DRAWING ====== */
+/* -------------------- DRAWING: MOUSE -------------------- */
 board.addEventListener("mousedown", (e) => {
   if (!isDrawer) return;
   drawing = true;
+  const rect = board.getBoundingClientRect();
   ctx.beginPath();
-  ctx.moveTo(e.offsetX, e.offsetY);
+  ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
   ctx.lineWidth = size;
   ctx.lineCap = "round";
   ctx.strokeStyle = color;
   socket.emit("startDrawing", {
     roomCode,
-    x: e.offsetX,
-    y: e.offsetY,
+    x: e.clientX - rect.left,
+    y: e.clientY - rect.top,
     color,
     size,
   });
@@ -164,22 +155,25 @@ board.addEventListener("mousedown", (e) => {
 
 board.addEventListener("mousemove", (e) => {
   if (!isDrawer || !drawing) return;
-  ctx.lineTo(e.offsetX, e.offsetY);
+  const rect = board.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  ctx.lineTo(x, y);
   ctx.stroke();
-  socket.emit("drawing", { roomCode, x: e.offsetX, y: e.offsetY });
+  socket.emit("drawing", { roomCode, x, y });
 });
 
-board.addEventListener("mouseup", () => stopDrawing());
-board.addEventListener("mouseleave", () => stopDrawing());
+board.addEventListener("mouseup", stopDraw);
+board.addEventListener("mouseleave", stopDraw);
 
-function stopDrawing() {
+function stopDraw() {
   if (!isDrawer) return;
   drawing = false;
   ctx.beginPath();
   socket.emit("stopDrawing", { roomCode });
 }
 
-/* ====== MOBILE TOUCH DRAWING ====== */
+/* -------------------- DRAWING: TOUCH -------------------- */
 board.addEventListener(
   "touchstart",
   (e) => {
@@ -221,7 +215,7 @@ board.addEventListener(
   (e) => {
     if (!isDrawer) return;
     e.preventDefault();
-    stopDrawing();
+    stopDraw();
   },
   { passive: false }
 );
@@ -240,14 +234,17 @@ socket.on("drawing", ({ x, y }) => {
   ctx.stroke();
 });
 
-socket.on("stopDrawing", () => ctx.beginPath());
+socket.on("stopDrawing", () => {
+  ctx.beginPath();
+});
+
 socket.on("clearCanvas", () => clearCanvas());
 
 /* -------------------- GUESS INPUT -------------------- */
 document.getElementById("sendGuess").addEventListener("click", sendGuess);
-document
-  .getElementById("guessInput")
-  .addEventListener("keydown", (e) => e.key === "Enter" && sendGuess());
+document.getElementById("guessInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") sendGuess();
+});
 
 function sendGuess() {
   const input = document.getElementById("guessInput");
