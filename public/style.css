@@ -1,13 +1,17 @@
 /* ======= RESET ======= */
 * {
   box-sizing: border-box;
+  -webkit-user-select: none;
+  user-select: none;
 }
-body {
+html, body {
+  height: 100%;
   margin: 0;
   font-family: "Poppins", sans-serif;
   background: #f6f7fb;
   color: #111;
   overflow-x: hidden;
+  overscroll-behavior: none;
 }
 
 /* ======= LOBBY ======= */
@@ -56,6 +60,7 @@ body {
   max-width: 1200px;
   margin-top: 10px;
   gap: 10px;
+  position: relative;
 }
 
 /* ======= SIDEBAR & CHAT ======= */
@@ -84,6 +89,7 @@ body {
   justify-content: center;
   align-items: center;
   width: 100%;
+  position: relative;
 }
 #board {
   background: #fff;
@@ -93,6 +99,11 @@ body {
   max-width: 900px;
   aspect-ratio: 4 / 3;
   touch-action: none;
+  position: relative;
+  flex-shrink: 0;
+  -webkit-user-drag: none;
+  -webkit-tap-highlight-color: transparent;
+  image-rendering: pixelated;
 }
 
 /* ======= TOOLS + TOP BAR ======= */
@@ -107,6 +118,9 @@ body {
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 .tools {
   display: flex;
@@ -128,6 +142,19 @@ body {
   transition: width 1s linear;
 }
 
+/* ======= PLAYER LIST ======= */
+.playerCard {
+  display: flex;
+  align-items: center;
+  margin: 6px 0;
+}
+.avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
 /* ======= MOBILE RESPONSIVE ======= */
 @media (max-width: 768px) {
   .layout {
@@ -144,10 +171,17 @@ body {
   .topbar {
     flex-direction: column;
     gap: 10px;
+    align-items: center;
+  }
+
+  .tools {
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
   #board {
-    width: 92vw;
+    width: 94vw;
+    max-width: none;
     aspect-ratio: 1 / 1;
   }
 
@@ -155,43 +189,20 @@ body {
     font-size: 0.9rem;
     padding: 8px 12px;
   }
+
+  .chat {
+    height: 180px;
+  }
 }
 
-/* ======= PLAYER LIST ======= */
-.playerCard {
-  display: flex;
-  align-items: center;
-  margin: 6px 0;
-}
-.avatar {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  margin-right: 8px;
-}
-html, body {
-  height: 100%;
-  overflow-x: hidden;
-  overscroll-behavior: none;
-  background: #f5f6fb;
-}
-
-.stage {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex: none; /* prevents flexbox from resizing this area */
-}
-
-#board {
-  background: #fff;
-  border: 3px solid #6366f1;
-  border-radius: 10px;
-  width: 90vw;
-  max-width: 900px;
-  height: auto;
-  aspect-ratio: 4/3;
+/* ======= SCROLL FIX ======= */
+body, html {
+  overscroll-behavior-y: contain;
   touch-action: none;
-  position: relative;
+}
+
+canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
 }
