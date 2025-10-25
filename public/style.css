@@ -1,16 +1,16 @@
-/* ===== RESET ===== */
+/* ======= RESET ======= */
 * {
   box-sizing: border-box;
 }
 body {
   margin: 0;
   font-family: "Poppins", sans-serif;
-  background: #f5f6fb;
+  background: #f6f7fb;
   color: #111;
   overflow-x: hidden;
 }
 
-/* ===== LOBBY ===== */
+/* ======= LOBBY ======= */
 .center {
   display: flex;
   flex-direction: column;
@@ -40,43 +40,81 @@ body {
   background: #3730a3;
 }
 
-/* ===== GAME ===== */
+/* ======= GAME LAYOUT ======= */
 .game {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 10px;
 }
+.layout {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 1200px;
+  margin-top: 10px;
+  gap: 10px;
+}
+
+/* ======= SIDEBAR & CHAT ======= */
+.sidebar,
+.chatbox {
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  width: 260px;
+  min-height: 200px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.chatbox {
+  flex: 1;
+}
+.chat {
+  height: 200px;
+  overflow-y: auto;
+}
+
+/* ======= CANVAS AREA ======= */
+.stage {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+#board {
+  background: #fff;
+  border: 3px solid #6366f1;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 900px;
+  aspect-ratio: 4 / 3;
+  touch-action: none;
+}
+
+/* ======= TOOLS + TOP BAR ======= */
 .topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  background: white;
-  width: 100%;
+  width: 95%;
   max-width: 900px;
-  padding: 10px;
+  background: white;
+  padding: 8px 10px;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 .tools {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-#colorPicker {
-  width: 35px;
-  height: 35px;
-  border: none;
-  background: none;
-  cursor: pointer;
-}
-#brushSize {
-  width: 100px;
-}
 
-/* ===== TIMER ===== */
+/* ======= TIMER ======= */
 .timerBar {
   width: 120px;
   height: 8px;
@@ -90,46 +128,36 @@ body {
   transition: width 1s linear;
 }
 
-/* ===== LAYOUT ===== */
-.layout {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  width: 100%;
-  max-width: 1200px;
-  gap: 10px;
-}
-.sidebar,
-.chatbox {
-  background: #fff;
-  border-radius: 10px;
-  padding: 10px;
-  width: 250px;
-  min-height: 200px;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-.chat {
-  height: 200px;
-  overflow-y: auto;
-}
-.stage {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-#board {
-  background: #fff;
-  border: 3px solid #6366f1;
-  border-radius: 10px;
-  width: 100%;
-  max-width: 900px;
-  aspect-ratio: 4 / 3;
-  touch-action: none;
+/* ======= MOBILE RESPONSIVE ======= */
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .sidebar,
+  .chatbox {
+    width: 90%;
+    max-width: none;
+  }
+
+  .topbar {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  #board {
+    width: 92vw;
+    aspect-ratio: 1 / 1;
+  }
+
+  .btn {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
 }
 
-/* ===== PLAYER LIST ===== */
+/* ======= PLAYER LIST ======= */
 .playerCard {
   display: flex;
   align-items: center;
@@ -141,54 +169,7 @@ body {
   border-radius: 50%;
   margin-right: 8px;
 }
-
-/* ===== MOBILE ===== */
-@media (max-width: 768px) {
-  .layout {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .sidebar,
-  .chatbox {
-    width: 95%;
-  }
-
-  .stage {
-    order: -1; /* show canvas first */
-    width: 100%;
-  }
-
-  #board {
-    width: 92vw;
-    height: auto;
-    aspect-ratio: 1 / 1;
-  }
-
-  .tools {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  #colorPicker {
-    width: 45px;
-    height: 45px;
-  }
-
-  .btn {
-    font-size: 0.9rem;
-    padding: 8px 14px;
-  }
-
-  .topbar {
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-  }
-
-
-}
-  html, body {
+html, body {
   height: 100%;
   overflow-x: hidden;
   overscroll-behavior: none;
