@@ -185,6 +185,9 @@ body {
     align-items: center;
     gap: 10px;
   }
+
+
+}
   html, body {
   height: 100%;
   overflow-x: hidden;
@@ -210,6 +213,4 @@ body {
   aspect-ratio: 4/3;
   touch-action: none;
   position: relative;
-}
-
 }
