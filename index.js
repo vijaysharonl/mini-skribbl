@@ -8,19 +8,54 @@ const io = new Server(server);
 
 app.use(express.static("public"));
 
+/* -------------------- DATA -------------------- */
 const rooms = {};
-const words = ['banana', 'hotdog', 'sausage', 'pickle', 'melons', 'peaches', 'eggplant', 'donut', 'taco', 'bun', 'muffin', 'cream', 'popsicle', 'burrito', 'sandwich', 'nacho', 'cookie', 'lollipop', 'kiss', 'bed', 'shower', 'undies', 'bra', 'boxer', 'heels', 'lipstick', 'selfie', 'wink', 'bikini', 'blush', 'pillow', 'mirror', 'perfume', 'handcuffs', 'blanket', 'candle', 'chocolate', 'whip', 'massage', 'belly', 'tongue', 'beard', 'eyebrow', 'icecube', 'lotion', 'towel', 'pajamas', 'diary', 'poop', 'fart', 'toilet', 'underwear', 'hairbrush', 'sneeze', 'pussycat', 'rooster', 'monkey', 'donkey', 'duck', 'cow', 'pig', 'disco', 'wine', 'shot', 'champagne', 'cocktail', 'straw', 'couch', 'belt', 'tie', 'boots', 'necklace', 'sunglasses', 'wet', 'hot', 'sticky', 'sweaty', 'juicy', 'spicy', 'rough', 'smooth', 'clown', 'slipper', 'remote', 'balloon', 'soap', 'bathtub', 'rubberduck', 'bubbles', 'steam', 'sponge', 'naughty', 'secret', 'spy', 'kissmark', 'whisper', 'dare', 'truth', 'flirt', 'filter', 'emoji', 'hashtag', 'like', 'meme', 'honey', 'sugar', 'candy', 'icecream', 'milkshake', 'date', 'rose', 'heart', 'cupid', 'valentine', 'couple', 'hug', 'wink', 'lick', 'bite', 'chase', 'drool', 'sock', 'wig', 'sweat', 'dance', 'twerk', 'karaoke', 'pizza', 'toast', 'popcorn', 'burger', 'fries', 'onion', 'cheese', 'potato', 'chips', 'marshmallow', 'coffee', 'beer', 'milk', 'fork', 'spoon', 'knife', 'lunchbox', 'basket', 'lipgloss', 'bracelet', 'watch', 'charger', 'laptop', 'keyboard', 'backpack', 'wallet', 'ribbon', 'balloon', 'confetti', 'cake', 'candle', 'guitar', 'drum', 'violin', 'piano', 'microphone', 'speaker', 'heartbeat', 'devil', 'fire', 'moon', 'star', 'rocket', 'alien', 'mermaid', 'unicorn', 'dragon', 'genie', 'witch', 'vampire', 'ghost', 'angel', 'halo', 'seduce', 'cuddle', 'tickle', 'dance', 'jump', 'slide', 'spin', 'chase', 'hide', 'peek', 'spy', 'sneak', 'snap', 'stretch', 'pose', 'laugh', 'scream', 'sleep', 'dream', 'jump', 'crawl', 'run', 'fly', 'swim', 'surf', 'float', 'dive', 'twirl', 'shake', 'bounce', 'climb', 'fall', 'chase', 'grab', 'tug', 'poke', 'tap', 'pull', 'push', 'kick', 'punch', 'smack', 'slap', 'sniff', 'snore', 'yawn', 'stretch', 'blink', 'sweat', 'shiver', 'chill', 'heat', 'steam', 'splash', 'smoke', 'fire', 'rain', 'thunder', 'lightning', 'shadow', 'glow', 'spark', 'flame', 'cloud', 'wave', 'breeze', 'storm', 'tornado', 'volcano', 'earth', 'ocean', 'island', 'beach', 'cave', 'forest', 'jungle', 'desert', 'mountain', 'valley', 'river', 'lake', 'waterfall', 'rope', 'chain', 'mask', 'shorts', 'shirt', 'jacket', 'crown', 'tattoo', 'phone', 'camera', 'charger', 'laptop', 'keyboard', 'mouse', 'chair', 'couch', 'door', 'window', 'curtain', 'closet', 'key', 'lock', 'bell', 'alarm', 'fan', 'light', 'switch', 'battery', 'knife', 'scissors', 'razor', 'toothbrush', 'hairdryer', 'ribbon', 'string', 'paper', 'book', 'pen', 'pencil', 'marker', 'note', 'card', 'coin', 'ticket', 'map', 'bag', 'backpack', 'bottle', 'calendar', 'clock', 'speaker', 'guitar', 'drum', 'piano', 'disco', 'stage', 'curtain', 'shadow', 'moonlight', 'heart'];
-const colors = ["#ef4444","#10b981","#3b82f6","#f59e0b","#8b5cf6","#ec4899"];
+const words = [
+  "banana", "hotdog", "sausage", "pickle", "melons", "peaches", "eggplant",
+  "donut", "taco", "bun", "muffin", "cream", "popsicle", "burrito",
+  "sandwich", "nacho", "cookie", "lollipop", "kiss", "bed", "shower",
+  "undies", "bra", "boxer", "heels", "lipstick", "selfie", "wink", "bikini",
+  "blush", "pillow", "mirror", "perfume", "handcuffs", "blanket", "candle",
+  "chocolate", "whip", "massage", "belly", "tongue", "beard", "eyebrow",
+  "icecube", "lotion", "towel", "pajamas", "diary", "poop", "fart", "toilet",
+  "underwear", "hairbrush", "sneeze", "pussycat", "rooster", "monkey",
+  "donkey", "duck", "cow", "pig", "disco", "wine", "shot", "champagne",
+  "cocktail", "straw", "couch", "belt", "tie", "boots", "necklace",
+  "sunglasses", "wet", "hot", "sticky", "sweaty", "juicy", "spicy", "rough",
+  "smooth", "clown", "slipper", "remote", "balloon", "soap", "bathtub",
+  "rubberduck", "bubbles", "steam", "sponge", "naughty", "secret", "spy",
+  "kissmark", "whisper", "dare", "truth", "flirt", "filter", "emoji",
+  "hashtag", "like", "meme", "honey", "sugar", "candy", "icecream",
+  "milkshake", "date", "rose", "heart", "cupid", "valentine", "couple",
+  "hug", "wink", "lick", "bite", "chase", "drool", "sock", "wig", "sweat",
+  "dance", "twerk", "karaoke", "pizza", "toast", "popcorn", "burger", "fries",
+  "onion", "cheese", "potato", "chips", "marshmallow", "coffee", "beer",
+  "milk", "fork", "spoon", "knife", "lunchbox", "basket", "lipgloss",
+  "bracelet", "watch", "charger", "laptop", "keyboard", "backpack", "wallet",
+  "ribbon", "confetti", "cake", "candle", "guitar", "drum", "violin", "piano",
+  "microphone", "speaker", "heartbeat", "devil", "fire", "moon", "star",
+  "rocket", "alien", "mermaid", "unicorn", "dragon", "genie", "witch",
+  "vampire", "ghost", "angel", "halo", "seduce", "cuddle", "tickle", "jump",
+  "slide", "spin", "peek", "snap", "stretch", "pose", "laugh", "sleep",
+  "dream", "run", "fly", "swim", "surf", "climb", "fall", "grab", "tug",
+  "poke", "tap", "kick", "slap", "snore", "sweat", "rain", "storm", "beach",
+  "forest", "mountain", "valley", "island", "key", "lock", "door", "window",
+  "curtain", "fan", "light", "battery", "knife", "pen", "pencil", "paper",
+  "book", "map", "bag", "bottle", "clock", "speaker", "stage", "shadow",
+  "moonlight", "heart"
+];
+const colors = ["#ef4444", "#10b981", "#3b82f6", "#f59e0b", "#8b5cf6", "#ec4899"];
 
 function genRoomCode() {
   return Math.random().toString(36).substring(2, 6).toUpperCase();
 }
 
+/* -------------------- SOCKET HANDLERS -------------------- */
 io.on("connection", (socket) => {
   socket.data.roomCode = null;
   socket.data.name = null;
 
-  // Create room
+  /* ========== CREATE ROOM ========== */
   socket.on("createRoom", (name) => {
     const roomCode = genRoomCode();
     rooms[roomCode] = {
@@ -46,7 +81,7 @@ io.on("connection", (socket) => {
     io.to(roomCode).emit("playerList", Object.values(rooms[roomCode].players));
   });
 
-  // Join room
+  /* ========== JOIN ROOM ========== */
   socket.on("joinRoom", ({ roomCode, playerName }) => {
     const room = rooms[roomCode];
     if (!room) return socket.emit("errorMessage", "Room not found!");
@@ -62,7 +97,7 @@ io.on("connection", (socket) => {
     io.to(roomCode).emit("playerList", Object.values(room.players));
   });
 
-  // Host starts game manually
+  /* ========== START GAME ========== */
   socket.on("startGame", () => {
     const roomCode = socket.data.roomCode;
     const room = rooms[roomCode];
@@ -74,7 +109,7 @@ io.on("connection", (socket) => {
     startRound(roomCode);
   });
 
-  // Drawing events
+  /* ========== DRAW EVENTS ========== */
   socket.on("startDrawing", (data) => forwardIfDrawer(socket, "startDrawing", data));
   socket.on("drawing", (data) => forwardIfDrawer(socket, "drawing", data));
   socket.on("stopDrawing", (data) => forwardIfDrawer(socket, "stopDrawing", data));
@@ -86,10 +121,11 @@ io.on("connection", (socket) => {
     socket.to(socket.data.roomCode).emit(event, data);
   }
 
-  // Guessing
+  /* ========== GUESSING ========== */
   socket.on("guess", ({ roomCode, guess }) => {
     const room = rooms[roomCode];
     if (!room || !room.word || !room.gameActive) return;
+
     const name = room.players[socket.id]?.name || "Player";
     const correct = guess.trim().toLowerCase() === room.word.toLowerCase();
 
@@ -97,23 +133,35 @@ io.on("connection", (socket) => {
       room.players[socket.id].score += 10;
       io.to(roomCode).emit("message", `✅ ${name} guessed it right!`);
       io.to(roomCode).emit("updateScores", Object.values(room.players));
+
       clearInterval(room.timer);
+      room.timer = null;
+
       setTimeout(() => rotateDrawer(roomCode), 1500);
     } else {
       io.to(roomCode).emit("message", `${name}: ${guess}`);
     }
   });
 
+  /* ========== DISCONNECT ========== */
   socket.on("disconnect", () => {
     const roomCode = socket.data.roomCode;
     if (!roomCode || !rooms[roomCode]) return;
     const room = rooms[roomCode];
-    delete room.players[socket.id];
 
+    delete room.players[socket.id];
     io.to(roomCode).emit("playerList", Object.values(room.players));
+
+    if (Object.keys(room.players).length < 2) {
+      clearInterval(room.timer);
+      room.gameActive = false;
+      io.to(roomCode).emit("message", "⚠️ Not enough players — game paused.");
+      return;
+    }
 
     if (socket.id === room.drawer) {
       clearInterval(room.timer);
+      room.timer = null;
       rotateDrawer(roomCode);
     }
 
@@ -132,12 +180,12 @@ function startRound(roomCode) {
     return;
   }
 
-  // pick drawer by rotation index
+  // Select next drawer
   const drawerId = ids[room.drawerIndex % ids.length];
   room.drawer = drawerId;
   const drawerName = room.players[drawerId].name;
 
-  // pick a word
+  // Pick word + setup
   room.word = words[Math.floor(Math.random() * words.length)];
   room.hint = room.word.split("").map(() => "_").join(" ");
   room.timeLeft = 80;
@@ -159,7 +207,7 @@ function startRound(roomCode) {
     room.timeLeft--;
     io.to(roomCode).emit("timerUpdate", room.timeLeft);
 
-    // reveal letter every 30s
+    // Reveal letters every 30s
     if (room.timeLeft === 50 || room.timeLeft === 20) {
       room.hint = revealLetter(room.word, room.hint);
       ids.forEach((id) => {
@@ -168,9 +216,9 @@ function startRound(roomCode) {
       });
     }
 
-    // timeout
     if (room.timeLeft <= 0) {
       clearInterval(room.timer);
+      room.timer = null;
       io.to(roomCode).emit("message", `⏰ Time’s up! The word was "${room.word}"`);
       setTimeout(() => rotateDrawer(roomCode), 1500);
     }
@@ -180,10 +228,15 @@ function startRound(roomCode) {
 function rotateDrawer(roomCode) {
   const room = rooms[roomCode];
   if (!room) return;
-  room.drawerIndex++;
-  if (room.drawerIndex >= Object.keys(room.players).length) {
-    room.drawerIndex = 0; // loop back
+
+  const ids = Object.keys(room.players);
+  if (ids.length < 2) {
+    io.to(roomCode).emit("message", "⚠️ Not enough players to continue!");
+    room.gameActive = false;
+    return;
   }
+
+  room.drawerIndex = (room.drawerIndex + 1) % ids.length;
   startRound(roomCode);
 }
 
@@ -198,5 +251,7 @@ function revealLetter(word, currentHint) {
 }
 
 /* -------------------- SERVER START -------------------- */
-const PORT = 3000;
-server.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () =>
+  console.log(`🚀 Server running at http://localhost:${PORT}`)
+);
