@@ -293,6 +293,13 @@ function lockCanvasSize() {
   board.width = rect.width;
   board.height = rect.height;
 }
+
+// Prevent viewport resize from redrawing canvas
+window.visualViewport?.addEventListener("resize", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+});
+
 window.addEventListener("load", lockCanvasSize);
 
 
