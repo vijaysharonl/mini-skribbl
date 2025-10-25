@@ -287,6 +287,15 @@ function enterGame(code) {
   clearCanvas();
 }
 
+// ===== LOCK CANVAS SIZE AFTER INITIAL LOAD =====
+function lockCanvasSize() {
+  const rect = board.getBoundingClientRect();
+  board.width = rect.width;
+  board.height = rect.height;
+}
+window.addEventListener("load", lockCanvasSize);
+
+
 function clearCanvas() {
   ctx.clearRect(0, 0, board.width, board.height);
 }
