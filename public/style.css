@@ -185,4 +185,31 @@ body {
     align-items: center;
     gap: 10px;
   }
+  html, body {
+  height: 100%;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+  background: #f5f6fb;
+}
+
+.stage {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: none; /* prevents flexbox from resizing this area */
+}
+
+#board {
+  background: #fff;
+  border: 3px solid #6366f1;
+  border-radius: 10px;
+  width: 90vw;
+  max-width: 900px;
+  height: auto;
+  aspect-ratio: 4/3;
+  touch-action: none;
+  position: relative;
+}
+
 }
